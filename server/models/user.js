@@ -41,7 +41,7 @@ UserSchema.methods.toJSON = function() {
     return _.pick(userObject, ['_id', 'email']);
 };
 
-UserSchema.methods.generateAuthToken = function() {
+UserSchema.methods.generateAuthToken = function () {
     var user = this;
     var access = 'auth';
     var token = jwt.sign({_id: user._id.toHexString(), access}, 'abc123').toString();
@@ -49,6 +49,16 @@ UserSchema.methods.generateAuthToken = function() {
     user.tokens.push({access, token});
 
     return user.save().then(() => token);
+};
+
+UserSchema.methods.removeToken = function (token) {
+    var user = this;
+
+    return user.update({
+        $pull: {
+            tokens: { token }
+        }
+    });
 };
 
 UserSchema.pre('save', function (next) {
